@@ -1,12 +1,13 @@
 from sqlalchemy import create_engine, Column, String, Float, Integer, Boolean, DateTime, Text, ForeignKey, Enum as SQLEnum
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker, relationship
+from sqlalchemy.orm import sessionmaker, relationship, declarative_base
 from sqlalchemy.dialects.postgresql import UUID
 from datetime import datetime
 from enum import Enum
 import uuid
 import os
 from dotenv import load_dotenv
+from .settings import settings
 
 load_dotenv()
 
@@ -117,6 +118,18 @@ class EstimateDB(Base):
     items = relationship("EstimateItemDB", back_populates="estimate")
     template = relationship("EstimateTemplateDB")
 
+# SQLite requires 'check_same_thread=False' when used with async servers like Uvicorn.
+connect_args = {"check_same_thread": False} if settings.DATABASE_URL.startswith("sqlite") else {}
+
+# echo=False keeps logs quiet. Set True if you want to see executed SQL while debugging.
+engine = create_engine(settings.DATABASE_URL, future=True, echo=False, connect_args=connect_args)
+
+# Session maker used in get_db() to create short-lived sessions per request.
+SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False, future=True)
+
+# Base class used by model classes to define tables.
+Base = declarative_base()
+
 # Dependency to get database session
 def get_db():
     db = SessionLocal()
@@ -124,4 +137,3 @@ def get_db():
         yield db
     finally:
         db.close()
-
