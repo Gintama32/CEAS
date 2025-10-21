@@ -6,15 +6,28 @@ import json
 import uuid
 from datetime import datetime
 import os
-
-from models import (
-    Estimate, EstimateTemplate, EstimateItem, EstimateSection, 
+from pydantic import BaseModel, EmailStr
+from sqlalchemy.orm import session
+from .database import Base, engine, get_db
+from .settings import get_cors_origins
+from .models import (
+    User, RefreshToken,
+    Estimate, EstimateTemplate, EstimateItem, EstimateSection,
     EstimateData, ExcelExportRequest, UnitType, ItemType
 )
+from .session import (
+    TokenPair,
+    issue_session,
+    rotate_refresh,
+    revoke_this_device,
+    revoke_all_devices,
+    get_current_user,
+)
+
+#Create Missing Tables
+Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
-
-
 
 app.add_middleware(CORSMiddleware, 
     allow_origins=["http://localhost:5173"], 
@@ -232,3 +245,57 @@ def root():
 @app.get("/api/v1/users")
 def get_users():
     return {"message": "Users fetched successfully"}
+
+# Create tables if they don't exist (dev convenience).
+Base.metadata.create_all(bind=engine)
+
+app = FastAPI(title="CEAS — Sessions")
+
+# CORS config (allow all in dev; lock to your frontend origin(s) in prod)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=get_cors_origins(),
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "DELETE", "OPTIONS"],
+    allow_headers=["Authorization", "Content-Type"],
+)
+
+#Request bodies (Pydantic)
+
+class IssueIn(BaseModel):
+    #SSO callback will pass these values after Microsoft verifies identity.
+    email: EmailStr
+    full_name: str | None = None
+    ms_oid: str | None = None
+
+class RefreshIn(BaseModel):
+    # Client sends the refresh token it previously received
+    refresh_token: str
+
+class LogoutIn(BaseModel):
+    # Revoke just this device (single refresh token)
+    refresh_token: str
+
+#Routes
+
+@app.post("/auth/issue", response_model=TokenPair)
+def auth_issue(body: IssueIn, db: session = Depends(get_db)):
+    return issue_session(db, body.email, body.full_name, body.ms_oid)
+
+@app.post("/auth/refresh", response_model=TokenPair)
+def auth_refresh(body: RefreshIn, db: session = Depends(get_db)):
+    return rotate_refresh(db, body.refresh_token)
+
+@app.post("/auth/logout", status_code=204)
+def auth_logout(body: LogoutIn, db: session = Depends(get_db)):
+    revoke_this_device(db, body.refresh_token)
+    return
+
+@app.post("/auth/logout-all", status_code=204)
+def auth_logout_all(current_user: "User" = Depends(get_current_user), db: session = Depends(get_db)):
+    revoke_all_devices(db, current_user)
+    return
+
+@app.get("/me")
+def me(current_user: "User" = Depends(get_current_user)):
+    return {"id": current_user.id, "email": current_user.email, "full_name": current_user.full_name}
