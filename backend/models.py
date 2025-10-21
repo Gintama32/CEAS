@@ -2,6 +2,9 @@ from pydantic import BaseModel
 from typing import List, Optional, Dict, Any
 from datetime import datetime
 from enum import Enum
+from sqlalchemy import String, Integer, DateTime, func, ForeignKey
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+from .database import Base
 
 class UnitType(str, Enum):
     SF = "SF"  # Square Feet
@@ -82,3 +85,32 @@ class ExcelExportRequest(BaseModel):
     format_options: Dict[str, Any] = {}
     include_totals: bool = True
     include_breakdown: bool = True
+    
+class User(Base):
+    __tablename__ = "users"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    email: Mapped[str] = mapped_column(String(255), unique=True, index=True, nullable=False)
+    full_name: Mapped[str | None] = mapped_column(String(255))
+    ms_oid: Mapped[str | None] = mapped_column(String(64), index=True)  # optional: Microsoft object id
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    # back_populates links the relationship on both sides
+    refresh_tokens: Mapped[list["RefreshToken"]] = relationship(
+        "RefreshToken", back_populates="user", cascade="all, delete-orphan"
+    )
+
+class RefreshToken(Base):
+    __tablename__ = "refresh_tokens"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    # Non-secret identifier (lets us look up the row fast)
+    jti: Mapped[str] = mapped_column(String(50), unique=True, index=True, nullable=False)
+    # Bcrypt hash of the secret piece. We never store raw refresh token values.
+    token_hash: Mapped[str] = mapped_column(String(128), nullable=False)
+    # FK back to the user who owns this token.
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    user: Mapped[User] = relationship("User", back_populates="refresh_tokens")
+    # Supports single-use rotation (old token -> new token).
+    parent_jti: Mapped[str | None] = mapped_column(String(50))
+    # Timestamps to manage lifecycle.
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    revoked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
