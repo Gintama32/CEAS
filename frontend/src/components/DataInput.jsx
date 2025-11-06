@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-const DataInput = ({ onDataSubmit }) => {
+const DataInput = () => {
     const [formData, setFormData] = useState({
         project_name: '',
         project_location: '',
@@ -14,6 +14,8 @@ const DataInput = ({ onDataSubmit }) => {
     });
 
     const [items, setItems] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [message, setMessage] = useState({ type: '', text: '' });
 
     const units = ['SF', 'EA', 'LS', 'LF', 'CY', 'SY', 'TON', 'HR'];
 
@@ -55,8 +57,17 @@ const DataInput = ({ onDataSubmit }) => {
         setItems(prev => prev.filter(item => item.id !== id));
     };
 
-    const handleSubmit = () => {
-        if (formData.project_name && formData.client_name && items.length > 0) {
+    const handleSubmit = async () => {
+        if (!formData.project_name || !formData.client_name || items.length === 0) {
+            setMessage({ type: 'error', text: 'Please fill in all required fields and add at least one item.' });
+            return;
+        }
+
+        setLoading(true);
+        setMessage({ type: '', text: '' });
+
+        try {
+            // Prepare data for API
             const dataToSubmit = {
                 project_info: {
                     project_name: formData.project_name,
@@ -65,15 +76,43 @@ const DataInput = ({ onDataSubmit }) => {
                     prepared_by: formData.prepared_by,
                     estimate_date: new Date().toISOString()
                 },
-                items: items,
+                items: items.map(item => ({
+                    description: item.description,
+                    quantity: item.quantity,
+                    unit: item.unit,
+                    material_unit_cost: item.material_unit_cost,
+                    material_amount: item.material_amount,
+                    labor_unit_cost: item.labor_unit_cost,
+                    labor_amount: item.labor_amount,
+                    total_amount: item.material_amount + item.labor_amount,
+                    item_type: 'line_item'
+                })),
                 metadata: {
                     created_at: new Date().toISOString(),
                     total_items: items.length
                 }
             };
+
+            // Send to backend
+            const response = await fetch('http://localhost:8000/api/v1/data/import', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(dataToSubmit)
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const result = await response.json();
             
-            onDataSubmit(dataToSubmit);
-            
+            setMessage({ 
+                type: 'success', 
+                text: `✅ Data saved successfully! ID: ${result.id}` 
+            });
+
             // Reset form
             setFormData({
                 project_name: '',
@@ -87,6 +126,20 @@ const DataInput = ({ onDataSubmit }) => {
                 labor_unit_cost: ''
             });
             setItems([]);
+
+            // Clear success message after 5 seconds
+            setTimeout(() => {
+                setMessage({ type: '', text: '' });
+            }, 5000);
+
+        } catch (error) {
+            console.error('Error saving data:', error);
+            setMessage({ 
+                type: 'error', 
+                text: `❌ Error saving data: ${error.message}. Make sure the backend server is running.` 
+            });
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -95,8 +148,22 @@ const DataInput = ({ onDataSubmit }) => {
     const grandTotal = totalMaterial + totalLabor;
 
     return (
-        <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+        <div style={{ maxWidth: '800px', margin: '0 auto', padding: '20px' }}>
             <h3 style={{ marginBottom: '20px', color: '#333' }}>📊 Data Input Form</h3>
+            
+            {/* Status Message */}
+            {message.text && (
+                <div style={{
+                    padding: '12px',
+                    borderRadius: '6px',
+                    marginBottom: '20px',
+                    backgroundColor: message.type === 'success' ? '#d4edda' : '#f8d7da',
+                    color: message.type === 'success' ? '#155724' : '#721c24',
+                    border: `1px solid ${message.type === 'success' ? '#c3e6cb' : '#f5c6cb'}`
+                }}>
+                    {message.text}
+                </div>
+            )}
             
             {/* Project Information */}
             <div style={{ 
@@ -383,19 +450,19 @@ const DataInput = ({ onDataSubmit }) => {
             <div style={{ textAlign: 'center' }}>
                 <button
                     onClick={handleSubmit}
-                    disabled={!formData.project_name || !formData.client_name || items.length === 0}
+                    disabled={!formData.project_name || !formData.client_name || items.length === 0 || loading}
                     style={{
-                        backgroundColor: items.length > 0 && formData.project_name && formData.client_name ? '#28a745' : '#6c757d',
+                        backgroundColor: items.length > 0 && formData.project_name && formData.client_name && !loading ? '#28a745' : '#6c757d',
                         color: 'white',
                         border: 'none',
                         padding: '12px 24px',
                         borderRadius: '6px',
-                        cursor: items.length > 0 && formData.project_name && formData.client_name ? 'pointer' : 'not-allowed',
+                        cursor: items.length > 0 && formData.project_name && formData.client_name && !loading ? 'pointer' : 'not-allowed',
                         fontSize: '16px',
                         fontWeight: 'bold'
                     }}
                 >
-                    💾 Save Data to Database
+                    {loading ? '⏳ Saving...' : '💾 Save Data to Database'}
                 </button>
             </div>
         </div>
