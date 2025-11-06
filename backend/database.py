@@ -7,12 +7,12 @@ from enum import Enum
 import uuid
 import os
 from dotenv import load_dotenv
-from settings import settings
+from .settings import settings
 
 load_dotenv()
 
 # Database URL - you'll need to replace this with your Supabase connection string
-DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://postgres:password@localhost/ceas_db")
+DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://user:password@localhost/ceas_db")
 
 engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
@@ -117,6 +117,18 @@ class EstimateDB(Base):
     sections = relationship("EstimateSectionDB", back_populates="estimate")
     items = relationship("EstimateItemDB", back_populates="estimate")
     template = relationship("EstimateTemplateDB")
+
+# SQLite requires 'check_same_thread=False' when used with async servers like Uvicorn.
+connect_args = {"check_same_thread": False} if settings.DATABASE_URL.startswith("sqlite") else {}
+
+# echo=False keeps logs quiet. Set True if you want to see executed SQL while debugging.
+engine = create_engine(settings.DATABASE_URL, future=True, echo=False, connect_args=connect_args)
+
+# Session maker used in get_db() to create short-lived sessions per request.
+SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False, future=True)
+
+# Base class used by model classes to define tables.
+Base = declarative_base()
 
 # Dependency to get database session
 def get_db():

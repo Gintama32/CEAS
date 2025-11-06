@@ -1,7 +1,6 @@
 from fastapi import FastAPI, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
-from sqlalchemy.orm import Session
 from typing import List, Optional
 import json
 import uuid
@@ -9,15 +8,14 @@ from datetime import datetime
 import os
 from pydantic import BaseModel, EmailStr
 from sqlalchemy.orm import session
-from database import Base, engine, get_db
-from database import EstimateDB, EstimateItemDB, EstimateSectionDB
-from settings import get_cors_origins
-from models import (
+from .database import Base, engine, get_db
+from .settings import get_cors_origins
+from .models import (
     User, RefreshToken,
     Estimate, EstimateTemplate, EstimateItem, EstimateSection,
     EstimateData, ExcelExportRequest, UnitType, ItemType
 )
-from session import (
+from .session import (
     TokenPair,
     issue_session,
     rotate_refresh,
@@ -38,80 +36,19 @@ app.add_middleware(CORSMiddleware,
     allow_headers=["*"]
 )
 
-# In-memory "databases" used by the non-persistent APIs (dev/demo only)
-data_db = {}
-templates_db = {}
-estimates_db = {}
-
 # Data Management Endpoints
 @app.post("/api/v1/data/import")
-async def import_data(data: EstimateData, db: Session = Depends(get_db)):
-    """Import raw data and save to PostgreSQL database"""
-    try:
-        # Create new estimate in database
-        new_estimate = EstimateDB(
-            id=uuid.uuid4(),
-            project_name=data.project_info.get("project_name", "Untitled Project"),
-            project_location=data.project_info.get("project_location", ""),
-            client_name=data.project_info.get("client_name", ""),
-            estimate_date=datetime.fromisoformat(data.project_info.get("estimate_date", datetime.now().isoformat())),
-            prepared_by=data.project_info.get("prepared_by", ""),
-            status="draft",
-            created_at=datetime.now(),
-            updated_at=datetime.now()
-        )
-        
-        # Calculate totals
-        total_material = sum(item.material_amount or 0 for item in data.items)
-        total_labor = sum(item.labor_amount or 0 for item in data.items)
-        total_amount = total_material + total_labor
-        
-        new_estimate.total_material = total_material
-        new_estimate.total_labor = total_labor
-        new_estimate.total_amount = total_amount
-        
-        # Add estimate to database
-        db.add(new_estimate)
-        db.flush()  # Get the estimate ID
-        
-        # Add items to database
-        for idx, item in enumerate(data.items):
-            new_item = EstimateItemDB(
-                id=uuid.uuid4(),
-                description=item.description,
-                quantity=item.quantity,
-                unit=UnitType(item.unit) if item.unit else None,
-                material_unit_cost=item.material_unit_cost,
-                material_amount=item.material_amount,
-                labor_unit_cost=item.labor_unit_cost,
-                labor_amount=item.labor_amount,
-                total_unit_cost=(item.material_unit_cost or 0) + (item.labor_unit_cost or 0),
-                total_amount=item.total_amount,
-                item_type=ItemType.LINE_ITEM,
-                sort_order=idx,
-                estimate_id=new_estimate.id
-            )
-            db.add(new_item)
-        
-        # Commit to database
-        db.commit()
-        db.refresh(new_estimate)
-        
-        return {
-            "id": str(new_estimate.id),
-            "message": "Data saved to database successfully",
-            "estimate_id": str(new_estimate.id),
-            "total_items": len(data.items),
-            "total_amount": total_amount
-        }
-        
-    except Exception as e:
-        db.rollback()
-        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
-
-
-
-
+async def import_data(data: EstimateData):
+    """Import raw data for processing"""
+    data_id = str(uuid.uuid4())
+    data_db[data_id] = {
+        "id": data_id,
+        "project_info": data.project_info,
+        "items": [item.dict() for item in data.items],
+        "metadata": data.metadata,
+        "created_at": datetime.now().isoformat()
+    }
+    return {"id": data_id, "message": "Data imported successfully"}
 
 @app.get("/api/v1/data/{data_id}")
 async def get_data(data_id: str):
@@ -187,8 +124,6 @@ async def create_estimate(estimate: Estimate):
     
     estimates_db[estimate_id] = estimate.dict()
     return {"id": estimate_id, "message": "Estimate created successfully"}
-
-
 
 @app.get("/api/v1/estimates")
 async def list_estimates():
@@ -311,6 +246,21 @@ def root():
 def get_users():
     return {"message": "Users fetched successfully"}
 
+# Create tables if they don't exist (dev convenience).
+Base.metadata.create_all(bind=engine)
+
+app = FastAPI(title="CEAS — Sessions")
+
+# CORS config (allow all in dev; lock to your frontend origin(s) in prod)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=get_cors_origins(),
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "DELETE", "OPTIONS"],
+    allow_headers=["Authorization", "Content-Type"],
+)
+
+#Request bodies (Pydantic)
 
 class IssueIn(BaseModel):
     #SSO callback will pass these values after Microsoft verifies identity.

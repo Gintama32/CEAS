@@ -4,7 +4,7 @@ from datetime import datetime
 from enum import Enum
 from sqlalchemy import String, Integer, DateTime, func, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from database import Base
+from .database import Base
 
 class UnitType(str, Enum):
     SF = "SF"  # Square Feet
