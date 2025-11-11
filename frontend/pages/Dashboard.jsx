@@ -1,11 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import DataPage from "./DataPage";
 import EstimatesPage from "./EstimatesPage";
 import TemplatesPage from "./TemplatesPage";
-
+import ProjectPage from "./ProjectPage";
 function Dashboard() {
     const [selectedOption, setSelectedOption] = useState(null);
-    const [loading, setLoading] = useState(false);
 
 
     const handleOptionSelect = (option) => {
@@ -19,11 +18,12 @@ function Dashboard() {
 
     const dashboardOptions = [
         {
-            id: 'data',
-            title: 'Data',
-            description: 'View and manage your data',
-            icon: '📊'
+            id: 'project',
+            title: 'Project',
+            description: 'Create and review projects',
+            icon: '🏢'
         },
+
         {
             id: 'estimates',
             title: 'Estimates',
@@ -40,8 +40,10 @@ function Dashboard() {
 
 
     // If a page is selected, render that page
-    if (selectedOption === 'data') {
-        return <DataPage onBack={handleBackToDashboard} />;
+
+
+    if (selectedOption === 'project') {
+        return <ProjectPage onBack={handleBackToDashboard} />;
     }
 
     if (selectedOption === 'estimates') {

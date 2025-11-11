@@ -1,6 +1,13 @@
 import os
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 class Settings:
+    # Project
+    PROJECT_NAME = os.getenv("PROJECT_NAME", "CEAS")
+    PROJECT_VERSION = os.getenv("PROJECT_VERSION", "1.0.0")
     #JWT
     # SECRET_KEY is used to sign and verify your JWTs. Change this in production.
     SECRET_KEY = os.getenv("SECRET_KEY", "CHANGE_ME_TO_A_LONG_RANDOM_SECRET_64_CHARS")
@@ -15,7 +22,7 @@ class Settings:
     #Database
     # Default to SQLite file for zero-config local dev.
     #   postgresql+psycopg://user:pass@host:5432/ceas
-    DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///ceas.db")
+    DATABASE_URL = os.getenv("DATABASE_URL")
     #CORS
     # During dev allow everything. In prod, set frontend origin(s):
     #   CORS_ALLOW_ORIGINS="https://app.example.com,https://admin.example.com"

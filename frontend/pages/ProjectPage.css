@@ -1,0 +1,236 @@
+.project-page {
+    padding: 20px;
+    max-width: 960px;
+    margin: 0 auto;
+}
+
+.project-back-button {
+    background-color: #6c757d;
+    color: #ffffff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.project-back-button:hover {
+    background-color: #5a6268;
+    transform: translateY(-1px);
+}
+
+.project-back-button-wrapper {
+    margin-bottom: 20px;
+}
+
+.project-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.project-header__title {
+    margin: 0;
+    color: #333333;
+}
+
+.project-toggle-button {
+    background-color: #28a745;
+    color: #ffffff;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.project-toggle-button--active {
+    background-color: #dc3545;
+}
+
+.project-toggle-button:hover {
+    transform: translateY(-1px);
+}
+
+.project-form-wrapper {
+    margin-bottom: 30px;
+}
+
+.project-list-wrapper {
+    background-color: #ffffff;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.project-loading,
+.project-error,
+.project-empty {
+    margin: 0;
+    color: #555555;
+}
+
+.project-error {
+    color: #dc3545;
+}
+
+.project-empty {
+    color: #555555;
+}
+
+.project-list {
+    display: grid;
+    gap: 16px;
+}
+
+.project-card {
+    background-color: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: box-shadow 0.3s ease, transform 0.3s ease;
+}
+
+.project-card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
+}
+
+.project-card__content {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.project-card__info {
+    flex: 1;
+    min-width: 250px;
+}
+
+.project-card__title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.project-card__title-icon {
+    font-size: 22px;
+}
+
+.project-card__title-text {
+    margin: 0;
+    color: #333333;
+}
+
+.project-card__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-bottom: 16px;
+}
+
+.project-card__label {
+    font-size: 12px;
+    color: #666666;
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.project-card__value {
+    color: #333333;
+    font-size: 15px;
+}
+
+.project-card__metrics {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 20px;
+    background-color: #f8f9fa;
+    padding: 14px;
+    border-radius: 6px;
+}
+
+.project-card__metric {
+    text-align: center;
+}
+
+.project-card__metric-label {
+    font-size: 11px;
+    color: #666666;
+    margin-bottom: 4px;
+    letter-spacing: 0.6px;
+}
+
+.project-card__metric-value {
+    font-size: 16px;
+    font-weight: bold;
+    color: #333333;
+}
+
+.project-card__metric-value--highlight {
+    color: #007bff;
+}
+
+.project-card__actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-width: 160px;
+}
+
+.project-card__button {
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    color: #ffffff;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.project-card__button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
+}
+
+.project-card__button--edit {
+    background-color: #ffc107;
+    color: #212529;
+}
+
+.project-card__button--add {
+    background-color: #28a745;
+}
+
+.project-card__button--delete {
+    background-color: #dc3545;
+}
+
+@media (max-width: 576px) {
+    .project-back-button,
+    .project-toggle-button,
+    .project-card__button {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .project-card__actions {
+        width: 100%;
+    }
+}
