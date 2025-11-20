@@ -92,6 +92,11 @@ class User(Base):
     email: Mapped[str] = mapped_column(String(255), unique=True, index=True, nullable=False)
     full_name: Mapped[str | None] = mapped_column(String(255))
     ms_oid: Mapped[str | None] = mapped_column(String(64), index=True)  # optional: Microsoft object id
+
+    #Local Login Support
+    hashed_password: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+    
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     # back_populates links the relationship on both sides
     refresh_tokens: Mapped[list["RefreshToken"]] = relationship(
