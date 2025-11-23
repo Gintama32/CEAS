@@ -20,6 +20,9 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/issue")
 _pwd = CryptContext(schemes=["sha256_crypt"], deprecated="auto")
 #Pydantic models (responses & claims)
 
+#Hash and Verify User Passwords
+password_pwd = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
 class TokenPair(BaseModel):
     access_token: str
     refresh_token: str
@@ -31,6 +34,17 @@ class TokenData(BaseModel):
     jti: str
     iss: str
     aud: str
+
+#Password Help for Email and Password Login
+def hash_password(password: str) -> str:  # NEW
+    """Hash a plain-text password for storage."""
+    return password_pwd.hash(password)
+
+def verify_password(plain_password: str, hashed_password: str | None) -> bool:  # NEW
+    """Verify a plain-text password against the stored hash."""
+    if not hashed_password:
+        return False
+    return password_pwd.verify(plain_password, hashed_password)
 
 def _as_aware(dt: datetime) -> datetime:
         return dt if dt.tzinfo else dt.replace(tzinfo=timezone.utc)
@@ -159,3 +173,65 @@ def revoke_all_devices(db: Session, user: User) -> None:
     for t in tokens:
         t.revoked_at = _now()
     db.commit()
+
+def authenticate_user_with_email_password(  # NEW
+    db: Session,
+    email: str,
+    password: str,
+) -> User:
+    # Look up a user by email and verify their password.
+    # Raises HTTP 401 if invalid.
+    user = db.query(User).filter(User.email == email).first()
+    if not user or not verify_password(password, user.hashed_password):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid email or password",
+        )
+    if user.is_active is False:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="User is inactive",
+        )
+    return user
+
+def issue_email_password_session(  # NEW
+    db: Session,
+    email: str,
+    password: str,
+) -> TokenPair:
+    """
+    Authenticate a local user via email+password and issue
+    an access + refresh token pair.  # NEW
+    """
+    user = authenticate_user_with_email_password(db, email, password)
+    access = _create_access_token(user.email)
+    refresh = _new_refresh_token(db, user)
+    return TokenPair(access_token=access, refresh_token=refresh)
+
+def ensure_dev_user(db: Session) -> None:  # NEW
+    # Create or update a temporary development user.
+    # DO NOT use this in production.  # NEW
+    DEV_EMAIL = "dev@example.com"
+    DEV_PASSWORD = "DevPassword123!"
+    DEV_NAME = "Dev User"
+
+    user = db.query(User).filter(User.email == DEV_EMAIL).first()
+    if user:
+        # If user exists but has no local password yet, set one
+        if not user.hashed_password:
+            user.hashed_password = hash_password(DEV_PASSWORD)
+            db.commit()
+        return
+
+    user = User(
+        email=DEV_EMAIL,
+        full_name=DEV_NAME,
+        hashed_password=hash_password(DEV_PASSWORD),
+        is_active=True,
+    )
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+    print("✅ Dev user seeded")  # NEW
+    print(f"   email:    {DEV_EMAIL}")
+    print(f"   password: {DEV_PASSWORD}")
