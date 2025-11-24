@@ -4,8 +4,7 @@ from sqlalchemy.orm import Session
 
 from db.session import get_db  # matches your main.py usage
 
-# ⬇️ Adjust this import to match the actual filename of your token/auth file
-from auth_session import (  # e.g., from auth_session import issue_email_password_session, ensure_dev_user, TokenPair
+from main.py import (  # e.g., from auth_session import issue_email_password_session, ensure_dev_user, TokenPair
     issue_email_password_session,
     ensure_dev_user,
     TokenPair,
