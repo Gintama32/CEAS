@@ -232,6 +232,6 @@ def ensure_dev_user(db: Session) -> None:  # NEW
     db.add(user)
     db.commit()
     db.refresh(user)
-    print("✅ Dev user seeded")  # NEW
+    print("Dev user seeded")  # NEW
     print(f"   email:    {DEV_EMAIL}")
     print(f"   password: {DEV_PASSWORD}")
