@@ -3,15 +3,19 @@ from fastapi.middleware.cors import CORSMiddleware
 from settings import settings
 
 from db.base import Base
-from db.session import engine
+from db.session import engine, get_db  # NEW: get_db
 from api.v1.data import data_router
 from api.v1.project import project_router
+from api.v1.auth import auth_router  # NEW
+
+from auth_session import ensure_dev_user
 # Import all models so they're registered with Base.metadata
 
 
 def include_routers(app:FastAPI):
     app.include_router(data_router, prefix="/api/v1/data")
     app.include_router(project_router, prefix="/api/v1/project")
+    app.include_router(auth_router, prefix="/api/v1")
 def create_tables():
     Base.metadata.create_all(bind=engine)
 
@@ -34,6 +38,16 @@ def start_application():
     
     include_routers(app)
     create_tables()
+
+    # NEW: seed dev user on startup
+    @app.on_event("startup")
+    def _seed_dev_user() -> None:  # NEW
+        db = next(get_db())
+        try:
+            ensure_dev_user(db)
+        finally:
+            db.close()
+
     return app
 
 app = start_application()
