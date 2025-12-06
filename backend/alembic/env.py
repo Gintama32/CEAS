@@ -24,7 +24,14 @@ if config.config_file_name is not None:
 
 # add your model's MetaData object here
 # for 'autogenerate' support
-from database import Base
+import sys
+from pathlib import Path
+
+# Add the backend directory to the path so we can import db modules
+backend_dir = Path(__file__).parent.parent
+sys.path.insert(0, str(backend_dir))
+
+from db.base import Base
 target_metadata = Base.metadata
 
 # other values from the config, defined by the needs of env.py,

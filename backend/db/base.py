@@ -11,6 +11,10 @@
 from .base_class import Base
 from .models.data import Data  # noqa: F401
 from .models.project import Project  # noqa: F401
+from .models.excel_data import ExcelData  # noqa: F401
+from .models.template import Template, TemplateSection, TemplateItem  # noqa: F401
+from .models.estimate import Estimate  # noqa: F401
+
 # class UnitType(str, Enum):
 #     SF = "SF"  # Square Feet
 #     EA = "EA"  # Each

@@ -6,12 +6,18 @@ from db.base import Base
 from db.session import engine
 from api.v1.data import data_router
 from api.v1.project import project_router
-# Import all models so they're registered with Base.metadata
+from api.v1.excel_data import excel_data_router
+from api.v1.templates import templates_router
+from api.v1.estimates import estimates_router
 
 
 def include_routers(app:FastAPI):
     app.include_router(data_router, prefix="/api/v1/data")
     app.include_router(project_router, prefix="/api/v1/project")
+    app.include_router(excel_data_router, prefix="/api/v1")
+    app.include_router(templates_router, prefix="/api/v1")
+    app.include_router(estimates_router, prefix="/api/v1")
+
 def create_tables():
     Base.metadata.create_all(bind=engine)
 

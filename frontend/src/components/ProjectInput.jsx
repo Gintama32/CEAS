@@ -46,10 +46,11 @@ function ProjectInput({ onProjectSubmit }) {
         <h4 style={{ marginBottom: '15px', color: '#333' }}>Project Information</h4>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '15px' }}>
             <div>
-                <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
+                <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }} htmlFor="project_name">
                     Project Name *
                 </label>
                 <input
+                    id="project_name"
                     type="text"
                     name="project_name"
                     value={formData.project_name}
@@ -64,10 +65,11 @@ function ProjectInput({ onProjectSubmit }) {
                 />
             </div>
             <div>
-                <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
+                <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }} htmlFor="project_location">
                     Project Location
                 </label>
                 <input
+                    id="project_location"
                     type="text"
                     name="project_location"
                     value={formData.project_location}
@@ -82,10 +84,11 @@ function ProjectInput({ onProjectSubmit }) {
                 />
             </div>
             <div>
-                <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
+                <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }} htmlFor="client_name">
                     Client Name *
                 </label>
                 <input
+                    id="client_name"
                     type="text"
                     name="client_name"
                     value={formData.client_name}
@@ -100,10 +103,11 @@ function ProjectInput({ onProjectSubmit }) {
                 />
             </div>
             <div>
-                <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
+                <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }} htmlFor="prepared_by">
                     Prepared By
                 </label>
                 <input
+                    id="prepared_by"
                     type="text"
                     name="prepared_by"
                     value={formData.prepared_by}
