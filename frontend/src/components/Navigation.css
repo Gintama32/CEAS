@@ -6,14 +6,15 @@
   right: 0;
   width: 100vw;
   background-color: white;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
   z-index: 1000;
-  padding: 15px 0;
+  padding: 4px 0;
+  border-bottom: 1px solid #e5e7eb;
 }
 
 .navigation-container {
   width: 100%;
-  padding: 0 40px;
+  padding: 0 20px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -23,8 +24,8 @@
 .logo-container {
   display: flex;
   align-items: center;
-  gap: 15px;
-  padding-right: 20px;
+  gap: 8px;
+  padding-right: 16px;
 }
 
 /* Navigation links */
@@ -48,32 +49,37 @@
   color: #007bff;
 }
 
+.nav-link.active {
+  background-color: #e0e7ff;
+  color: #3730a3;
+}
+
 .logo {
-  width: 50px;
-  height: 50px;
-  background-color: #007bff;
-  border-radius: 8px;
+  width: 28px;
+  height: 28px;
+  background-color: #34495e;
+  border-radius: 4px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 24px;
+  font-size: 14px;
   font-weight: bold;
   color: white;
-  box-shadow: 0 2px 10px rgba(0, 123, 255, 0.2);
+  box-shadow: 0 1px 2px rgba(52, 73, 94, 0.2);
 }
 
 /* User profile styles */
 .user-profile {
   position: relative;
-  padding-left: 20px;
+  padding-left: 16px;
 }
 
 .user-button {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 8px 16px;
-  border-radius: 8px;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 4px;
   cursor: pointer;
   transition: all 0.2s ease;
   border: 1px solid transparent;
@@ -85,17 +91,17 @@
 }
 
 .user-avatar {
-  width: 40px;
-  height: 40px;
-  background-color: #28a745;
+  width: 24px;
+  height: 24px;
+  background-color: #34495e;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 18px;
+  font-size: 11px;
   font-weight: bold;
   color: white;
-  box-shadow: 0 2px 10px rgba(40, 167, 69, 0.2);
+  box-shadow: 0 1px 2px rgba(52, 73, 94, 0.2);
 }
 
 /* Dropdown menu */

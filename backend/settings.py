@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 from dotenv import load_dotenv
 
 # Load environment variables from .env file
@@ -30,6 +31,11 @@ class Settings:
         o.strip() for o in os.getenv("CORS_ALLOW_ORIGINS", "*").split(",") if o.strip()
     ]
     CORS_ALLOW_CREDENTIALS = True
+    BASE_DIR = Path(__file__).resolve().parent
+    FILE_UPLOAD_DIR = os.getenv(
+        "FILE_UPLOAD_DIR",
+        str((Path(__file__).resolve().parent / "uploaded_excel").resolve())
+    )
 settings = Settings()
 
 def get_cors_origins() -> list[str]:

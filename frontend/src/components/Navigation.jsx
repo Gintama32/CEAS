@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { NavLink } from 'react-router-dom';
 import './Navigation.css';
 
 const Navigation = () => {
@@ -48,28 +49,41 @@ const Navigation = () => {
                     <div>
                         <h1 style={{ 
                             margin: '0', 
-                            color: '#333',
-                            fontSize: '24px',
-                            fontWeight: 'bold'
+                            color: '#1f2937',
+                            fontSize: '15px',
+                            fontWeight: '600',
+                            lineHeight: '1.2'
                         }}>
                             Construction Estimate & Analysis System
                         </h1>
                         <p style={{ 
                             margin: '0', 
-                            color: '#666',
-                            fontSize: '14px'
+                            color: '#6b7280',
+                            fontSize: '10px',
+                            lineHeight: '1.2'
                         }}>
                             Professional Construction Estimating Platform
                         </p>
                     </div>
-                    
-                    {/* Optional: Add navigation links here if needed */}
-                    {/* <div className="nav-links">
-                        <a href="#" className="nav-link">Dashboard</a>
-                        <a href="#" className="nav-link">Projects</a>
-                        <a href="#" className="nav-link">Reports</a>
-                    </div> */}
                 </div>
+
+                <nav className="nav-links">
+                    <NavLink to="/" className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`}>
+                        Dashboard
+                    </NavLink>
+                    <NavLink to="/projects" className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`}>
+                        Projects
+                    </NavLink>
+                    <NavLink to="/database" className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`}>
+                        Database
+                    </NavLink>
+                    <NavLink to="/estimates" className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`}>
+                        Estimates
+                    </NavLink>
+                    <NavLink to="/templates" className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`}>
+                        Templates
+                    </NavLink>
+                </nav>
 
                 {/* User Profile */}
                 <div className="user-profile" data-user-menu>
@@ -85,17 +99,19 @@ const Navigation = () => {
                         </div>
                         <div>
                             <div style={{ 
-                                fontSize: '14px', 
-                                fontWeight: 'bold', 
-                                color: '#333',
-                                margin: '0'
+                                fontSize: '12px', 
+                                fontWeight: '600', 
+                                color: '#1f2937',
+                                margin: '0',
+                                lineHeight: '1.2'
                             }}>
                                 John Doe
                             </div>
                             <div style={{ 
-                                fontSize: '12px', 
-                                color: '#666',
-                                margin: '0'
+                                fontSize: '10px', 
+                                color: '#6b7280',
+                                margin: '0',
+                                lineHeight: '1.2'
                             }}>
                                 Project Manager
                             </div>

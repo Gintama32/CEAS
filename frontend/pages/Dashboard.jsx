@@ -1,20 +1,19 @@
-import React, { useState } from "react";
-import DataPage from "./DataPage";
-import EstimatesPage from "./EstimatesPage";
-import TemplatesPage from "./TemplatesPage";
-import ProjectPage from "./ProjectPage";
-function Dashboard() {
-    const [selectedOption, setSelectedOption] = useState(null);
+import React from "react";
+import { useNavigate } from "react-router-dom";
 
+function Dashboard() {
+    const navigate = useNavigate();
 
     const handleOptionSelect = (option) => {
-        setSelectedOption(option);
         console.log(`Selected option: ${option}`);
-    }
-
-    const handleBackToDashboard = () => {
-        setSelectedOption(null);
-    }
+        if (option === 'project') {
+            navigate('/projects');
+        } else if (option === 'estimates') {
+            navigate('/estimates');
+        } else if (option === 'templates') {
+            navigate('/templates');
+        }
+    };
 
     const dashboardOptions = [
         {
@@ -23,7 +22,6 @@ function Dashboard() {
             description: 'Create and review projects',
             icon: '🏢'
         },
-
         {
             id: 'estimates',
             title: 'Estimates',
@@ -38,23 +36,7 @@ function Dashboard() {
         }
     ];
 
-
-    // If a page is selected, render that page
-
-
-    if (selectedOption === 'project') {
-        return <ProjectPage onBack={handleBackToDashboard} />;
-    }
-
-    if (selectedOption === 'estimates') {
-        return <EstimatesPage onBack={handleBackToDashboard} />;
-    }
-
-    if (selectedOption === 'templates') {
-        return <TemplatesPage onBack={handleBackToDashboard} />;
-    }
-
-    // Otherwise, render the main dashboard
+    // Render the main dashboard
     return (
         <div style={{ padding: '20px' }}>
             <h2 style={{ 
